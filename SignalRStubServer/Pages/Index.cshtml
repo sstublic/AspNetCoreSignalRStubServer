@@ -1,0 +1,53 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+
+<div>
+	<label>Click this button to send message to server: </label>
+	<button class="btn btn-primary" onclick="sendClientPing()">Send client ping</button>
+</div>
+
+<hr/>
+
+<script>
+	function log(msg) {
+		document.getElementById('log').innerHTML += msg + '\n';
+	}
+	$().ready(function () {
+		document.getElementById('source').innerHTML = document.getElementById('demo-script').innerHTML;
+	});
+	
+</script>
+<script id="demo-script">
+
+	var connection = new signalR.HubConnectionBuilder().withUrl('/signalrhub').build();
+	connection.on('ServerCounterReport',
+		function (msg) {
+			log('Received message: \'' + msg + '\'');
+		});
+
+	connection.start().then(function () {
+		log('Client side connection started.');
+	});
+
+	function sendClientPing() {
+		connection.invoke('ClientPing')
+			.then(function (result) {
+				log('Invoked ClientPing. Received \'' + result + '\'');
+			})
+			.catch(function (err) {
+				log('Error invoking ClientPing: \'' + err.toString() + '\'');
+			});
+	}
+
+</script>
+
+<h3>Demo source in this page</h3>
+<pre id="source" class="bg-light"></pre>
+
+<pre id="log">
+<strong>Start of log:</strong>
+</pre>
